@@ -15,6 +15,10 @@ export default class MoneroTipButton extends Component {
     return this.args.outletArgs?.model;
   }
 
+  get received() {
+    return this.user?.monero_tips;
+  }
+
   get isVisible() {
     return this.siteSettings.monero_tips_enabled && !!userAddress(this.user);
   }
@@ -37,6 +41,12 @@ export default class MoneroTipButton extends Component {
           {{icon this.siteSettings.monero_tips_icon}}
           <span>{{i18n "monero_tips.tip"}}</span>
         </button>
+
+        {{#if this.received}}
+          <span class="monero-tip-received">
+            {{i18n "monero_tips.received" count=this.received.count}}
+          </span>
+        {{/if}}
       </li>
     {{/if}}
   </template>

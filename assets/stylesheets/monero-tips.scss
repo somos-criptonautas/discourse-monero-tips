@@ -44,3 +44,24 @@
     font-size: var(--font-down-1);
   }
 }
+
+.monero-tip-received {
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+  margin-left: 0.5em;
+}
+
+.monero-verified-preference {
+  &__key {
+    font-family: var(--d-font-family--monospace, monospace);
+  }
+
+  &__caveat {
+    max-width: 40em;
+  }
+}
+
+.monero-tip-modal__attribution {
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+}

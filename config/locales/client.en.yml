@@ -15,3 +15,18 @@ en:
         hint: "Shown on your posts and profile so members can tip you. Leave blank to show nothing. Tips arrive in your own wallet; nothing is verified by the forum."
         save: "Save address"
         saved: "Saved"
+      verified:
+        title: "Verified tips"
+        unavailable: "This forum has no Monero node configured for verified tips."
+        caveat: "A view key lets the forum see every payment that arrives in this wallet, forever, and it cannot be changed without moving to a new wallet. It can never spend your funds. Only opt in if you are comfortable with the forum seeing your incoming payments."
+        view_key: "Private view key"
+        enroll: "Turn on verified tips"
+        withdraw: "Turn off and forget my key"
+        status_pending: "Setting up your watch-only wallet…"
+        status_ready: "Watching for tips. Each member who tips you gets their own subaddress, which is how a tip gets credited to them."
+        status_error: "Something went wrong: %{error}"
+      attributed: "This address was made for you alone, so the tip is credited to you."
+      unattributed: "This member has not turned on verified tips, so nothing will be recorded."
+      received:
+        one: "%{count} verified tip"
+        other: "%{count} verified tips"

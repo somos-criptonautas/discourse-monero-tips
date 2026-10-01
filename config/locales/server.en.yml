@@ -2,5 +2,14 @@ en:
   site_settings:
     monero_tips_enabled: "Let members show a Monero address so others can tip them directly."
     monero_tips_icon: "Icon for the tip button. Needs to exist in your icon set."
+    monero_tips_verified_enabled: "Let members opt in to verified tips by supplying a view key. Needs a monero-wallet-rpc."
+    monero_wallet_rpc_url: "JSON-RPC endpoint of a monero-wallet-rpc holding only watch-only wallets. Must not be reachable from outside your network."
+    monero_tips_restore_height: "Block height new watch-only wallets start scanning from."
+    monero_tips_min_confirmations: "Confirmations before a tip counts as verified."
+    monero_tips_min_amount: "Payments smaller than this (in XMR) are ignored."
+    monero_tips_points_per_xmr: "Gamification points per XMR tipped, granted to the tipper. 0 disables it."
   monero_tips:
     invalid_address: "That does not look like a Monero address. It is 95 characters starting with 4 or 8, or 106 for an integrated address."
+    invalid_view_key: "A private view key is 64 hexadecimal characters."
+    address_first: "Add your Monero address before turning on verified tips."
+    verification_unavailable: "Verified tips are not available on this forum."

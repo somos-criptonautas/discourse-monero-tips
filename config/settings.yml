@@ -6,3 +6,26 @@ monero:
     default: "ph-dt-xmr"
     client: true
     description: "Icon for the tip button. Needs to exist in your icon set; change it if yours has no Monero glyph."
+
+  # Verified tips. Off until a wallet RPC is reachable.
+  monero_tips_verified_enabled:
+    default: false
+    client: true
+  monero_wallet_rpc_url:
+    default: ""
+    description: "JSON-RPC endpoint of a monero-wallet-rpc holding only watch-only wallets, e.g. http://monero-wallet-rpc:18083/json_rpc. Must not be reachable from outside your network."
+  monero_tips_restore_height:
+    default: 0
+    min: 0
+    description: "Block height new watch-only wallets start scanning from. Set it near the current height so wallets do not rescan years of chain."
+  monero_tips_min_confirmations:
+    default: 10
+    min: 1
+    max: 60
+  monero_tips_min_amount:
+    default: "0.001"
+    description: "Payments smaller than this (in XMR) are ignored."
+  monero_tips_points_per_xmr:
+    default: 0
+    min: 0
+    description: "Gamification points per XMR tipped, granted to the tipper. 0 disables it. Needs discourse-gamification."

@@ -12,6 +12,7 @@ export default class MoneroTipModal extends Component {
   @tracked address = null;
   @tracked uri = null;
   @tracked qr = null;
+  @tracked attributed = false;
   @tracked error = null;
   @tracked copied = false;
 
@@ -32,6 +33,7 @@ export default class MoneroTipModal extends Component {
       this.address = result.address;
       this.uri = result.uri;
       this.qr = result.qr;
+      this.attributed = result.attributed;
     } catch (e) {
       this.error = extractError(e);
     }
@@ -52,6 +54,14 @@ export default class MoneroTipModal extends Component {
       <:body>
         <p class="monero-tip-modal__intro">
           {{i18n "monero_tips.intro" username=this.username}}
+        </p>
+
+        <p class="monero-tip-modal__attribution">
+          {{#if this.attributed}}
+            {{i18n "monero_tips.attributed"}}
+          {{else}}
+            {{i18n "monero_tips.unattributed"}}
+          {{/if}}
         </p>
 
         {{#if this.error}}

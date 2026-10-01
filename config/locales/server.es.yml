@@ -2,5 +2,14 @@ es:
   site_settings:
     monero_tips_enabled: "Permite que cada miembro muestre una dirección de Monero para recibir propinas directas."
     monero_tips_icon: "Icono del botón de propina. Tiene que existir en tu set de iconos."
+    monero_tips_verified_enabled: "Permite que los miembros activen propinas verificadas entregando una clave de vista. Necesita un monero-wallet-rpc."
+    monero_wallet_rpc_url: "Endpoint JSON-RPC de un monero-wallet-rpc que solo tenga monederos de solo lectura. No puede quedar accesible desde fuera de tu red."
+    monero_tips_restore_height: "Altura de bloque desde la que empiezan a escanear los monederos nuevos."
+    monero_tips_min_confirmations: "Confirmaciones para que una propina cuente como verificada."
+    monero_tips_min_amount: "Los pagos menores a esto (en XMR) se ignoran."
+    monero_tips_points_per_xmr: "Puntos de gamificación por XMR de propina, para quien la envía. 0 lo desactiva."
   monero_tips:
     invalid_address: "Eso no parece una dirección de Monero. Son 95 caracteres que empiezan con 4 u 8, o 106 si es una dirección integrada."
+    invalid_view_key: "Una clave de vista privada son 64 caracteres hexadecimales."
+    address_first: "Agregá tu dirección de Monero antes de activar las propinas verificadas."
+    verification_unavailable: "Las propinas verificadas no están disponibles en este foro."

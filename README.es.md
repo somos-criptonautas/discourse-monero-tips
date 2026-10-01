@@ -36,21 +36,70 @@ Después activá `monero_tips_enabled`.
 |---|---|
 | `monero_tips_enabled` | Apagado por defecto |
 | `monero_tips_icon` | El icono de la propina. Por defecto `ph-dt-xmr`, que viene de nuestro set Phosphor duotone; cambialo por uno que tenga tu propio set (`coins` y `hand-holding-dollar` vienen con Discourse) |
+| `monero_tips_verified_enabled` | Permite activar propinas verificadas. Necesita un wallet RPC, ver abajo |
+| `monero_wallet_rpc_url` | El endpoint del wallet RPC |
+| `monero_tips_restore_height` | Desde dónde escanean los monederos nuevos |
+| `monero_tips_min_confirmations` | Confirmaciones para que cuente una propina. Por defecto 10 |
+| `monero_tips_min_amount` | Umbral de polvo en XMR |
+| `monero_tips_points_per_xmr` | Puntos de gamificación para quien envía. 0 lo apaga |
 
-## Qué no hace
+## Qué no hace, hasta que actives las propinas verificadas
 
 **No verifica nada.** Los montos en Monero están cifrados, así que una dirección sola no le dice a nadie si hubo un pago: ni al foro, ni a quien da la propina, ni a quien la recibe. Por eso acá no hay contadores, ni totales, ni tabla de posiciones, ni insignias: cada una de esas cosas sería un número que este plugin no puede sostener.
 
 Una dirección mal copiada no puede perder la plata de nadie. Las direcciones de Monero llevan un checksum y el monedero de quien envía se niega a gastar hacia una dirección rota, así que un error de tipeo no envía: falla. Acá solo se valida el formato, y por eso el campo es tuyo para revisarlo bien.
 
-## Propinas verificadas, más adelante
+## Propinas verificadas
 
-Se puede verificar sin que el foro toque los fondos, y hace falta un nodo de Monero: justo lo que ya tiene un foro que corra BTCPay con Monero activado. Hay dos caminos, y pueden convivir:
+Apagadas hasta que haya un wallet RPC de Monero accesible, y aun así cada miembro decide. Nada de esto es custodial: el foro solo llega a tener claves **de vista**, que no pueden gastar.
 
-- **Prueba por propina.** Quien envía pega el id de la transacción y su clave; el foro lo verifica contra el nodo (`check_tx_key`). No se guarda ningún secreto y, como esa clave solo la tiene quien envió, la prueba también establece quién fue.
-- **Clave de vista.** Un miembro que lo elija entrega su clave de vista privada una vez y las propinas que reciba se detectan solas. Una clave de vista no puede gastar, así que sigue sin haber custodia, pero es un secreto permanente que revela todos los pagos entrantes de ese monedero y no se puede rotar sin mudarse de monedero. A quien entregue una hay que decírselo claro, en la interfaz, en el momento de pegarla.
+### Qué necesita el foro
 
-Las insignias y los puntos irían sobre cualquiera de los dos caminos, porque ambos producen una propina de la que el foro sí puede responder.
+Un `monero-wallet-rpc` que no tenga más que monederos de solo lectura, apuntado a un nodo: el mismo que ya corre un BTCPay Server con Monero activado.
+
+```yaml
+monero-tips-wallet-rpc:
+  image: sethsimmons/simple-monero-wallet-rpc:latest
+  command: >
+    --wallet-dir /wallet
+    --daemon-address monerod:18081
+    --trusted-daemon
+    --rpc-bind-port 18083
+    --rpc-bind-ip 0.0.0.0
+    --confirm-external-bind
+    --disable-rpc-login
+  volumes:
+    - monero-tips-wallets:/wallet
+```
+
+**No puede quedar accesible desde fuera de tu red.** No pide autenticación, y cualquier cosa que lo alcance puede leer quién le pagó a quién. Dejalo en la red interna con Discourse y el nodo, nunca publicado al host.
+
+Después poné `monero_wallet_rpc_url` en `http://monero-tips-wallet-rpc:18083/json_rpc`, `monero_tips_restore_height` cerca de la altura actual para que los monederos nuevos no reescaneen toda la cadena, y activá `monero_tips_verified_enabled`.
+
+### Qué hace un miembro
+
+Pega su **clave de vista privada** en Preferencias → Perfil, después de leer qué implica. El plugin arma un monedero de solo lectura con su dirección y esa clave, y desde ahí cada miembro que abra su ventana de propina recibe una subdirección creada para ese par. Eso es lo que permite atribuir la propina: las transferencias de Monero no dicen quién envía, pero sí a qué subdirección llegaron.
+
+Puede desactivarlo cuando quiera: la clave se olvida y el escaneo se detiene. Las propinas ya registradas quedan, y las insignias ya otorgadas no se quitan.
+
+### Qué le cuesta
+
+Una clave de vista revela **todos** los pagos entrantes de ese monedero, para siempre, a quien la tenga, y no se puede rotar sin mudarse de monedero. Nunca puede gastar. La interfaz dice esto arriba del campo, antes de que se pueda pegar la clave: si traducís o reestilizás este plugin, dejalo así.
+
+### Insignias y puntos
+
+Vienen dos insignias como semillas, definidas como consultas SQL sobre la tabla del plugin, así que el otorgador de insignias de Discourse hace el trabajo y podés renombrarlas, cambiarles el estilo o desactivarlas desde la interfaz normal de insignias:
+
+| Insignia | Para quién |
+|---|---|
+| Monero Tipper | quien haya hecho llegar una propina confirmada a otro miembro |
+| Tipped in Monero | quien haya recibido una propina confirmada |
+
+`monero_tips_points_per_xmr` además le da puntos de gamificación a quien envía, por XMR, si está instalado `discourse-gamification`. Una propina cuenta como confirmada a partir de `monero_tips_min_confirmations` (10 por defecto), y todo lo que esté por debajo de `monero_tips_min_amount` se ignora como polvo.
+
+### Qué sigue sin poder verificarse
+
+Una propina pagada a la dirección pública de un miembro, y no a una subdirección creada para quien envía, se registra sin remitente: el foro ve que llegó pero no de quién. Las propinas a miembros que nunca lo activaron no se ven en absoluto, y la ventana lo dice.
 
 ## Desarrollo
 

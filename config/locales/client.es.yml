@@ -15,3 +15,18 @@ es:
         hint: "Se muestra en tus publicaciones y tu perfil para que te puedan dar propinas. Dejala vacía y no se muestra nada. Las propinas llegan a tu propio monedero; el foro no verifica nada."
         save: "Guardar dirección"
         saved: "Guardada"
+      verified:
+        title: "Propinas verificadas"
+        unavailable: "Este foro no tiene un nodo de Monero configurado para verificar propinas."
+        caveat: "Una clave de vista le permite al foro ver cada pago que llega a ese monedero, para siempre, y no se puede cambiar sin mudarte de monedero. Nunca puede gastar tus fondos. Activalo solo si estás a gusto con que el foro vea tus pagos entrantes."
+        view_key: "Clave de vista privada"
+        enroll: "Activar propinas verificadas"
+        withdraw: "Desactivar y olvidar mi clave"
+        status_pending: "Preparando tu monedero de solo lectura…"
+        status_ready: "Mirando si llegan propinas. Cada miembro que te dé una propina recibe su propia subdirección, y así la propina queda a su nombre."
+        status_error: "Algo salió mal: %{error}"
+      attributed: "Esta dirección se creó solo para vos, así que la propina queda a tu nombre."
+      unattributed: "Este miembro no activó las propinas verificadas, así que no se va a registrar nada."
+      received:
+        one: "%{count} propina verificada"
+        other: "%{count} propinas verificadas"
