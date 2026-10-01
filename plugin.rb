@@ -66,6 +66,13 @@ after_initialize do
       store_wallet(user_id, wallet.merge("status" => "error", "error" => message))
     end
 
+    # A plugin whose migrations have not run yet must not take the forum down
+    # from inside a serializer, so the table is checked once per process.
+    def self.tips_table_ready?
+      @tips_table_ready = ::MoneroTip.table_exists? if @tips_table_ready.nil?
+      @tips_table_ready
+    end
+
     def self.enrolled?(user_id)
       get_wallet(user_id).present?
     end
@@ -122,7 +129,10 @@ after_initialize do
   add_to_serializer(
     :user,
     :monero_tips,
-    include_condition: -> { SiteSetting.monero_tips_enabled && MoneroTip.exists?(payee_id: object.id, confirmed: true) },
+    include_condition: -> {
+      SiteSetting.monero_tips_enabled && DiscourseMoneroTips.tips_table_ready? &&
+        MoneroTip.exists?(payee_id: object.id, confirmed: true)
+    },
   ) do
     tips = MoneroTip.confirmed.where(payee_id: object.id)
 
