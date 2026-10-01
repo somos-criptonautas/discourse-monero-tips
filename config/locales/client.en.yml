@@ -1,0 +1,17 @@
+en:
+  js:
+    monero_tips:
+      tip: "Tip in Monero"
+      tip_user: "Tip %{username} in Monero"
+      modal_title: "Tip %{username}"
+      intro: "This address belongs to %{username}. The tip goes straight to their wallet — the forum never holds it and cannot confirm it arrived."
+      address: "Monero address"
+      copy: "Copy address"
+      copied: "Copied"
+      open_wallet: "Open in wallet"
+      scan: "Scan with your wallet"
+      preference:
+        label: "Monero address"
+        hint: "Shown on your posts and profile so members can tip you. Leave blank to show nothing. Tips arrive in your own wallet; nothing is verified by the forum."
+        save: "Save address"
+        saved: "Saved"

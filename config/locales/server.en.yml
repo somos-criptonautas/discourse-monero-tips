@@ -1,0 +1,6 @@
+en:
+  site_settings:
+    monero_tips_enabled: "Let members show a Monero address so others can tip them directly."
+    monero_tips_icon: "Icon for the tip button. Needs to exist in your icon set."
+  monero_tips:
+    invalid_address: "That does not look like a Monero address. It is 95 characters starting with 4 or 8, or 106 for an integrated address."

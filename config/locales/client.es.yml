@@ -1,0 +1,17 @@
+es:
+  js:
+    monero_tips:
+      tip: "Propina en Monero"
+      tip_user: "Dale una propina en Monero a %{username}"
+      modal_title: "Propina para %{username}"
+      intro: "Esta dirección es de %{username}. La propina va directo a su monedero: el foro nunca la toca ni puede confirmar que llegó."
+      address: "Dirección de Monero"
+      copy: "Copiar dirección"
+      copied: "Copiada"
+      open_wallet: "Abrir en el monedero"
+      scan: "Escanealo con tu monedero"
+      preference:
+        label: "Dirección de Monero"
+        hint: "Se muestra en tus publicaciones y tu perfil para que te puedan dar propinas. Dejala vacía y no se muestra nada. Las propinas llegan a tu propio monedero; el foro no verifica nada."
+        save: "Guardar dirección"
+        saved: "Guardada"

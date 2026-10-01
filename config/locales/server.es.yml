@@ -1,0 +1,6 @@
+es:
+  site_settings:
+    monero_tips_enabled: "Permite que cada miembro muestre una dirección de Monero para recibir propinas directas."
+    monero_tips_icon: "Icono del botón de propina. Tiene que existir en tu set de iconos."
+  monero_tips:
+    invalid_address: "Eso no parece una dirección de Monero. Son 95 caracteres que empiezan con 4 u 8, o 106 si es una dirección integrada."

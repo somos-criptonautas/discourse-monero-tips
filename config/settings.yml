@@ -1,0 +1,8 @@
+monero:
+  monero_tips_enabled:
+    default: false
+    client: true
+  monero_tips_icon:
+    default: "ph-dt-xmr"
+    client: true
+    description: "Icon for the tip button. Needs to exist in your icon set; change it if yours has no Monero glyph."
