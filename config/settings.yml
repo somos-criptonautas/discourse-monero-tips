@@ -4,8 +4,9 @@ monero:
     client: true
   monero_tips_icon:
     default: "ph-dt-xmr"
+    type: icon
     client: true
-    description: "Icon for the tip button. Needs to exist in your icon set; change it if yours has no Monero glyph."
+    description: "Icon for the tip button. Defaults to the Monero glyph bundled with the plugin."
 
   # Verified tips. Off until a wallet RPC is reachable.
   monero_tips_verified_enabled:

@@ -1,7 +1,7 @@
 en:
   site_settings:
     monero_tips_enabled: "Let members show a Monero address so others can tip them directly."
-    monero_tips_icon: "Icon for the tip button. Needs to exist in your icon set."
+    monero_tips_icon: "Icon for the tip button. Defaults to the Monero glyph bundled with the plugin; pick any other from the list."
     monero_tips_verified_enabled: "Let members opt in to verified tips by supplying a view key. Needs a monero-wallet-rpc."
     monero_wallet_rpc_url: "JSON-RPC endpoint of a monero-wallet-rpc holding only watch-only wallets. Must not be reachable from outside your network."
     monero_tips_restore_height: "Block height new watch-only wallets start scanning from."

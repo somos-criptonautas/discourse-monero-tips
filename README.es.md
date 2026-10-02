@@ -10,7 +10,7 @@ Propinas en Monero entre miembros. Cada quien publica la dirección de su propio
 
 1. Un miembro pega su dirección de Monero en **Preferencias → Perfil**.
 2. La dirección se valida y se guarda como campo público de usuario.
-3. Aparece un icono de propina junto a su nombre en cada publicación y en su perfil.
+3. Aparece un icono de propina en la esquina inferior izquierda de cada publicación suya y en su perfil.
 4. Quien lo toque obtiene la dirección, un código QR y un enlace `monero:` que abre su propio monedero.
 
 Ese es todo el flujo. No hay pago, ni callback, ni webhook, porque nada pasa por Discourse.
@@ -35,7 +35,7 @@ Después activá `monero_tips_enabled`.
 | Ajuste | Para qué |
 |---|---|
 | `monero_tips_enabled` | Apagado por defecto |
-| `monero_tips_icon` | El icono de la propina. Por defecto `ph-dt-xmr`, que viene de nuestro set Phosphor duotone; cambialo por uno que tenga tu propio set (`coins` y `hand-holding-dollar` vienen con Discourse) |
+| `monero_tips_icon` | El icono de la propina, elegido desde un desplegable. Por defecto `ph-dt-xmr`, un glifo de Monero que trae el plugin, así que se ve para todos sin necesitar un set de iconos propio |
 | `monero_tips_verified_enabled` | Permite activar propinas verificadas. Necesita un wallet RPC, ver abajo |
 | `monero_wallet_rpc_url` | El endpoint del wallet RPC |
 | `monero_tips_restore_height` | Desde dónde escanean los monederos nuevos |
@@ -96,6 +96,10 @@ Vienen dos insignias como semillas, definidas como consultas SQL sobre la tabla 
 | Tipped in Monero | quien haya recibido una propina confirmada |
 
 `monero_tips_points_per_xmr` además le da puntos de gamificación a quien envía, por XMR, si está instalado `discourse-gamification`. Una propina cuenta como confirmada a partir de `monero_tips_min_confirmations` (10 por defecto), y todo lo que esté por debajo de `monero_tips_min_amount` se ignora como polvo.
+
+### Workflows
+
+Con Discourse Workflows activado, el disparador **Propina en Monero confirmada** se ejecuta una vez por propina, cuando llega a `monero_tips_min_confirmations`. Trae la propina (`txid`, `amount` en XMR, `confirmations`, `received_at`, `attributed`), el `payee` y el `tipper`, que es nulo para una propina a la dirección propia del miembro. Su opción **Solo propinas atribuidas** las ignora. Otros plugins también pueden escuchar el evento `:monero_tip_confirmed` directamente.
 
 ### Qué sigue sin poder verificarse
 

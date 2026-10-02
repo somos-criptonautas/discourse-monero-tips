@@ -89,6 +89,22 @@ RSpec.describe Jobs::MoneroTipsSync do
     expect(MoneroTip.last.confirmed).to eq(true)
   end
 
+  it "announces a tip once, when it first confirms" do
+    transfers_return([transfer("confirmations" => 2)])
+    pending_events =
+      DiscourseEvent.track_events(:monero_tip_confirmed) { described_class.new.execute({}) }
+    expect(pending_events).to be_empty
+
+    transfers_return([transfer("confirmations" => 12)])
+    events = DiscourseEvent.track_events(:monero_tip_confirmed) { described_class.new.execute({}) }
+    expect(events.map { |e| e[:params].first }).to contain_exactly(MoneroTip.last)
+
+    transfers_return([transfer("confirmations" => 20)])
+    repeat_events =
+      DiscourseEvent.track_events(:monero_tip_confirmed) { described_class.new.execute({}) }
+    expect(repeat_events).to be_empty
+  end
+
   it "records a payment to the wallet's own address with no tipper" do
     transfers_return([transfer("address" => wallet_address, "txid" => "def456")])
 

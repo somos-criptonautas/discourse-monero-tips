@@ -8,12 +8,15 @@
   }
 }
 
-// In the post's name row: no padding of its own, so it sits on the baseline
-// with the username rather than pushing the row taller.
-.names .monero-tip-trigger {
-  padding: 0 0.25em;
-  background: none;
-  line-height: 1;
+// Bottom-left of the post, with the post menu's extra controls. Core gives it
+// the same size and padding as the other post buttons; this only spaces it
+// from the replies toggle beside it.
+.post-controls .post-action-menu__monero-tip {
+  margin-right: 0.25em;
+
+  .d-icon {
+    font-size: var(--font-up-1);
+  }
 }
 
 .monero-tip-modal {

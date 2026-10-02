@@ -2,7 +2,7 @@
 
 # name: discourse-monero-tips
 # about: Member-to-member Monero tips that go straight to each member's own wallet
-# version: 0.2.0
+# version: 0.3.0
 # authors: Criptonautas
 # url: https://github.com/somos-criptonautas/discourse-monero-tips
 # required_version: 3.4.0
@@ -10,6 +10,9 @@
 enabled_site_setting :monero_tips_enabled
 
 register_asset "stylesheets/monero-tips.scss"
+register_svg_icon "ph-dt-xmr"
+
+add_admin_route "monero_tips.title", "discourse-monero-tips", use_new_show_route: true
 
 module ::DiscourseMoneroTips
   PLUGIN_NAME = "discourse-monero-tips"
@@ -145,6 +148,13 @@ after_initialize do
     :monero_wallet_status,
     include_condition: -> { DiscourseMoneroTips.enrolled?(object.id) },
   ) { DiscourseMoneroTips.get_wallet(object.id)&.slice("status", "error") }
+
+  if respond_to?(:register_discourse_workflows_node)
+    register_discourse_workflows_node do
+      require_relative "lib/discourse_workflows/nodes/monero_tip_confirmed/v1"
+      DiscourseWorkflows::Nodes::MoneroTipConfirmed::V1
+    end
+  end
 
   on(:user_destroyed) do |user|
     DiscourseMoneroTips.remove_wallet(user.id)

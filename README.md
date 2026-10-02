@@ -10,7 +10,7 @@ Member-to-member Monero tips. Each member publishes their own wallet address; ti
 
 1. A member pastes their Monero address into **Preferences → Profile**.
 2. The address is validated and stored as a public user field.
-3. A tip icon appears next to their name on every post and on their profile.
+3. A tip icon appears at the bottom-left of each of their posts and on their profile.
 4. Anyone clicking it gets the address, a QR code, and a `monero:` link that opens their own wallet.
 
 That is the whole flow. There is no payment, callback or webhook, because nothing passes through Discourse.
@@ -35,7 +35,7 @@ Then enable `monero_tips_enabled`.
 | Setting | Purpose |
 |---|---|
 | `monero_tips_enabled` | Off by default |
-| `monero_tips_icon` | The tip icon. Defaults to `ph-dt-xmr`, which comes from our Phosphor duotone icon set — change it to one your own set has (`coins` and `hand-holding-dollar` ship with Discourse) |
+| `monero_tips_icon` | The tip icon, picked from a dropdown. Defaults to `ph-dt-xmr`, a Monero glyph the plugin bundles, so it shows for every visitor without any icon set of your own |
 | `monero_tips_verified_enabled` | Lets members opt in to verified tips. Needs a wallet RPC — see below |
 | `monero_wallet_rpc_url` | The wallet RPC endpoint |
 | `monero_tips_restore_height` | Where new watch-only wallets start scanning |
@@ -96,6 +96,10 @@ Two badges ship as seeds, defined as SQL queries over the plugin's own table, so
 | Tipped in Monero | anyone who received a confirmed tip |
 
 `monero_tips_points_per_xmr` additionally gives the tipper gamification points per XMR, if `discourse-gamification` is installed. A tip counts as confirmed at `monero_tips_min_confirmations` (10 by default), and anything under `monero_tips_min_amount` is ignored as dust.
+
+### Workflows
+
+With Discourse Workflows enabled, a **Monero tip confirmed** trigger fires once per tip, when it reaches `monero_tips_min_confirmations`. It carries the tip (`txid`, `amount` in XMR, `confirmations`, `received_at`, `attributed`), the `payee` and the `tipper` — null for a tip to the member's own address. Its **Attributed tips only** option skips those. Plugins can also listen for the `:monero_tip_confirmed` event directly.
 
 ### What is still unverifiable
 

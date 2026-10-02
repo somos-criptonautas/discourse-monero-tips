@@ -1,6 +1,7 @@
 en:
   js:
     monero_tips:
+      title: "Monero Tips"
       tip: "Tip in Monero"
       tip_user: "Tip %{username} in Monero"
       modal_title: "Tip %{username}"
@@ -30,3 +31,13 @@ en:
       received:
         one: "%{count} verified tip"
         other: "%{count} verified tips"
+    discourse_workflows:
+      node_unavailable:
+        requires_monero_verified_tips: "Requires Monero tips with verified tips turned on"
+      nodes:
+        "trigger:monero_tip_confirmed": "Monero tip confirmed"
+      node_descriptions:
+        "trigger:monero_tip_confirmed": "Fires when a verified Monero tip reaches the required confirmations"
+      monero_tip_confirmed:
+        attributed_only: "Attributed tips only"
+        attributed_only_description: "Skip tips sent to a member's own address, whose tipper is unknown."

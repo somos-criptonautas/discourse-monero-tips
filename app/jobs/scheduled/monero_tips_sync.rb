@@ -56,7 +56,10 @@ module Jobs
         tip.received_at ||= Time.at(transfer["timestamp"].to_i).utc
         tip.save!
 
-        award_points(tip) if tip.confirmed && !was_confirmed
+        next if !tip.confirmed || was_confirmed
+
+        award_points(tip)
+        DiscourseEvent.trigger(:monero_tip_confirmed, tip)
       end
     end
 

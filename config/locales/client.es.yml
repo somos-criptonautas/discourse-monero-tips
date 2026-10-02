@@ -1,6 +1,7 @@
 es:
   js:
     monero_tips:
+      title: "Propinas en Monero"
       tip: "Propina en Monero"
       tip_user: "Dale una propina en Monero a %{username}"
       modal_title: "Propina para %{username}"
@@ -30,3 +31,13 @@ es:
       received:
         one: "%{count} propina verificada"
         other: "%{count} propinas verificadas"
+    discourse_workflows:
+      node_unavailable:
+        requires_monero_verified_tips: "Requiere las propinas en Monero con las propinas verificadas activadas"
+      nodes:
+        "trigger:monero_tip_confirmed": "Propina en Monero confirmada"
+      node_descriptions:
+        "trigger:monero_tip_confirmed": "Se dispara cuando una propina verificada en Monero alcanza las confirmaciones necesarias"
+      monero_tip_confirmed:
+        attributed_only: "Solo propinas atribuidas"
+        attributed_only_description: "Ignora las propinas enviadas a la dirección propia del miembro, cuyo remitente no se conoce."
