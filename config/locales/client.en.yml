@@ -1,10 +1,9 @@
 en:
   js:
     monero_tips:
-      title: "Monero Tips"
-      tip: "Tip in Monero"
-      tip_user: "Tip %{username} in Monero"
-      modal_title: "Tip %{username}"
+      tip: "Monero Tips"
+      tip_user: "Monero Tips for %{username}"
+      modal_title: "Monero Tips — %{username}"
       intro: "This address belongs to %{username}. The tip goes straight to their wallet — the forum never holds it and cannot confirm it arrived."
       address: "Monero address"
       copy: "Copy address"
@@ -17,7 +16,7 @@ en:
         save: "Save address"
         saved: "Saved"
       verified:
-        title: "Verified tips"
+        title: "Verified Monero Tips"
         unavailable: "This forum has no Monero node configured for verified tips."
         caveat: "A view key lets the forum see every payment that arrives in this wallet, forever, and it cannot be changed without moving to a new wallet. It can never spend your funds. Only opt in if you are comfortable with the forum seeing your incoming payments."
         view_key: "Private view key"

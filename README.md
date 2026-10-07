@@ -4,7 +4,7 @@
 
 **ENGLISH** | [ESPAÑOL](README.es.md)
 
-Member-to-member Monero tips. Each member publishes their own wallet address; tips go straight from one wallet to the other. The forum never holds funds, never holds keys, and — in this version — never confirms that a tip arrived.
+**Monero Tips**: member-to-member tips in Monero. Each member publishes their own wallet address; tips go straight from one wallet to the other. The forum never holds funds, never holds keys, and — in this version — never confirms that a tip arrived.
 
 ## How it works
 
@@ -49,7 +49,7 @@ Then enable `monero_tips_enabled`.
 
 A wrong address cannot lose anyone's money. Monero addresses carry a checksum and the sender's wallet refuses to spend to a broken one, so a typo fails to send rather than paying a stranger. Validation here is only a format check, which is why the field is yours to double-check.
 
-## Verified tips
+## Verified Monero Tips
 
 Off until a Monero wallet RPC is reachable, and opt-in per member even then. Nothing about it is custodial: the forum only ever holds **view** keys, which cannot spend.
 

@@ -4,7 +4,7 @@
 
 [ENGLISH](README.md) | **ESPAÑOL**
 
-Propinas en Monero entre miembros. Cada quien publica la dirección de su propio monedero y la propina va directo de un monedero al otro. El foro nunca guarda fondos, nunca guarda claves y —en esta versión— nunca confirma que la propina llegó.
+**Monero Tips**: propinas en Monero entre miembros. Cada quien publica la dirección de su propio monedero y la propina va directo de un monedero al otro. El foro nunca guarda fondos, nunca guarda claves y —en esta versión— nunca confirma que la propina llegó.
 
 ## Cómo funciona
 
@@ -49,7 +49,7 @@ Después activá `monero_tips_enabled`.
 
 Una dirección mal copiada no puede perder la plata de nadie. Las direcciones de Monero llevan un checksum y el monedero de quien envía se niega a gastar hacia una dirección rota, así que un error de tipeo no envía: falla. Acá solo se valida el formato, y por eso el campo es tuyo para revisarlo bien.
 
-## Propinas verificadas
+## Monero Tips verificadas
 
 Apagadas hasta que haya un wallet RPC de Monero accesible, y aun así cada miembro decide. Nada de esto es custodial: el foro solo llega a tener claves **de vista**, que no pueden gastar.
 

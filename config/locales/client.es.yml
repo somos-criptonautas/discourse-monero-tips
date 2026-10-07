@@ -1,10 +1,9 @@
 es:
   js:
     monero_tips:
-      title: "Propinas en Monero"
-      tip: "Propina en Monero"
-      tip_user: "Dale una propina en Monero a %{username}"
-      modal_title: "Propina para %{username}"
+      tip: "Monero Tips"
+      tip_user: "Monero Tips para %{username}"
+      modal_title: "Monero Tips — %{username}"
       intro: "Esta dirección es de %{username}. La propina va directo a su monedero: el foro nunca la toca ni puede confirmar que llegó."
       address: "Dirección de Monero"
       copy: "Copiar dirección"
@@ -17,7 +16,7 @@ es:
         save: "Guardar dirección"
         saved: "Guardada"
       verified:
-        title: "Propinas verificadas"
+        title: "Monero Tips verificadas"
         unavailable: "Este foro no tiene un nodo de Monero configurado para verificar propinas."
         caveat: "Una clave de vista le permite al foro ver cada pago que llega a ese monedero, para siempre, y no se puede cambiar sin mudarte de monedero. Nunca puede gastar tus fondos. Activalo solo si estás a gusto con que el foro vea tus pagos entrantes."
         view_key: "Clave de vista privada"
