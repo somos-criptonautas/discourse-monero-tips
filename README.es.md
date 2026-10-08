@@ -115,6 +115,6 @@ Specs: `bundle exec rspec plugins/discourse-monero-tips/spec`. Frontend: `/qunit
 
 ## Licencia
 
-GPL-3.0. Ver [LICENSE](LICENSE).
+MIT. Ver [LICENSE](LICENSE).
 
 El texto de este README bajo [CC BY-NC-SA 4.0](CC-BY-NC-SA-4.0.txt).
