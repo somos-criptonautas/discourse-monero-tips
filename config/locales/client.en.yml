@@ -1,4 +1,9 @@
 en:
+  admin_js:
+    admin:
+      site_settings:
+        categories:
+          monero: "Monero Tips"
   js:
     monero_tips:
       tip: "Monero Tips"

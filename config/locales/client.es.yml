@@ -1,4 +1,9 @@
 es:
+  admin_js:
+    admin:
+      site_settings:
+        categories:
+          monero: "Propinas en Monero"
   js:
     monero_tips:
       tip: "Monero Tips"
