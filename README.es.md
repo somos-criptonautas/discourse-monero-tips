@@ -4,6 +4,8 @@
 
 [ENGLISH](README.md) | **ESPAÑOL**
 
+Mantenido por Criptonautas. Sin afiliación ni respaldo de Discourse (Civilized Discourse Construction Kit, Inc.).
+
 **Monero Tips**: propinas en Monero entre miembros. Cada quien publica la dirección de su propio monedero y la propina va directo de un monedero al otro. El foro nunca guarda fondos, nunca guarda claves y —en esta versión— nunca confirma que la propina llegó.
 
 ## Cómo funciona

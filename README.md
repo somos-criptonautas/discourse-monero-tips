@@ -4,6 +4,8 @@
 
 **ENGLISH** | [ESPAÑOL](README.es.md)
 
+Maintained by Criptonautas. Not affiliated with or endorsed by Discourse (Civilized Discourse Construction Kit, Inc.).
+
 **Monero Tips**: member-to-member tips in Monero. Each member publishes their own wallet address; tips go straight from one wallet to the other. The forum never holds funds, never holds keys, and — in this version — never confirms that a tip arrived.
 
 ## How it works
