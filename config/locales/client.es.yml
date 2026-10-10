@@ -3,7 +3,7 @@ es:
     admin:
       site_settings:
         categories:
-          monero: "Propinas en Monero"
+          monero: "Monero Tips"
   js:
     monero_tips:
       tip: "Monero Tips"
