@@ -46,6 +46,24 @@ RSpec.describe DiscourseMoneroTips::MoneroTipsController do
       expect(response.status).to eq(200)
       expect(user.reload.custom_fields["monero_address"]).to be_blank
     end
+
+    it "lets staff set the address of the system user" do
+      sign_in(Fabricate(:admin))
+
+      put "/monero-tips/address.json", params: { address: address, username: "system" }
+
+      expect(response.status).to eq(200)
+      expect(Discourse.system_user.reload.custom_fields["monero_address"]).to eq(address)
+    end
+
+    it "does not let a member set someone else's address" do
+      sign_in(user)
+
+      put "/monero-tips/address.json", params: { address: address, username: payee.username }
+
+      expect(response.status).to eq(403)
+      expect(payee.reload.custom_fields["monero_address"]).to be_blank
+    end
   end
 
   describe "#show" do

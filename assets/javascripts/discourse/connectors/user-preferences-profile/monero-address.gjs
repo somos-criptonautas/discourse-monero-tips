@@ -63,7 +63,10 @@ export default class MoneroAddressPreference extends Component {
     try {
       await ajax("/monero-tips/address", {
         type: "PUT",
-        data: { address: this.address },
+        data: {
+          address: this.address,
+          username: this.args.outletArgs?.model?.username,
+        },
       });
       this.saved = true;
     } catch (e) {

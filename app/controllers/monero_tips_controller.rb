@@ -30,12 +30,16 @@ module DiscourseMoneroTips
         return render_json_error(I18n.t("monero_tips.invalid_address"), status: 422)
       end
 
-      current_user.custom_fields[DiscourseMoneroTips::ADDRESS_FIELD] = address.presence
-      current_user.save_custom_fields
+      # Staff may set it on another account, e.g. system, which authors embedded topics.
+      user = params[:username].present? ? fetch_user_from_params : current_user
+      guardian.ensure_can_edit!(user)
+
+      user.custom_fields[DiscourseMoneroTips::ADDRESS_FIELD] = address.presence
+      user.save_custom_fields
 
       # The wallet was built from the old address, so it is no longer watching
       # the right place.
-      withdraw_wallet if address.blank? || address != wallet_address
+      withdraw_wallet(user) if address.blank? || address != wallet_address(user)
 
       render json: success_json.merge(address: address)
     end
@@ -82,15 +86,15 @@ module DiscourseMoneroTips
 
     private
 
-    def wallet_address
-      DiscourseMoneroTips.get_wallet(current_user.id)&.dig("address")
+    def wallet_address(user = current_user)
+      DiscourseMoneroTips.get_wallet(user.id)&.dig("address")
     end
 
     # Forgetting the key stops the scanning. Past tips stay — they happened, and
     # the badges they earned are not taken back.
-    def withdraw_wallet
-      DiscourseMoneroTips.remove_wallet(current_user.id)
-      ::MoneroTipAddress.where(payee_id: current_user.id).delete_all
+    def withdraw_wallet(user = current_user)
+      DiscourseMoneroTips.remove_wallet(user.id)
+      ::MoneroTipAddress.where(payee_id: user.id).delete_all
     end
 
     def payment_uri(address)
