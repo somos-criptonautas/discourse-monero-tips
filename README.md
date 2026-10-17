@@ -15,6 +15,8 @@ Maintained by Criptonautas. Not affiliated with or endorsed by Discourse (Civili
 3. A tip icon appears at the bottom-left of each of their posts and on their profile.
 4. Anyone clicking it gets the address, a QR code, and a `monero:` link that opens their own wallet.
 
+Staff can set the address on another account from that user's preferences, e.g. `system`, which authors embedded topics.
+
 That is the whole flow. There is no payment, callback or webhook, because nothing passes through Discourse.
 
 ## Installation

@@ -15,6 +15,8 @@ Mantenido por Criptonautas. Sin afiliación ni respaldo de Discourse (Civilized 
 3. Aparece un icono de propina en la esquina inferior izquierda de cada publicación suya y en su perfil.
 4. Quien lo toque obtiene la dirección, un código QR y un enlace `monero:` que abre su propio monedero.
 
+El staff puede cargar la dirección de otra cuenta desde las preferencias de ese usuario, por ejemplo `system`, que es quien publica los temas incrustados.
+
 Ese es todo el flujo. No hay pago, ni callback, ni webhook, porque nada pasa por Discourse.
 
 ## Instalación
