@@ -115,7 +115,9 @@ module DiscourseMoneroTips
             next unless header.start_with?("Digest ")
             header.scan(/(\w+)="?([^",]*)"?/).to_h
           end
-      server = fields.find { |f| DIGESTS.key?(f.fetch("algorithm", "MD5")) }
+      # Strongest first, whatever order the challenges came in.
+      server =
+        DIGESTS.keys.filter_map { |a| fields.find { |f| f.fetch("algorithm", "MD5") == a } }.first
       raise Error, "the wallet RPC offered no usable login" if server.nil?
 
       algorithm = server.fetch("algorithm", "MD5")
