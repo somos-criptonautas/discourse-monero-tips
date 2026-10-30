@@ -8,6 +8,11 @@ module DiscourseMoneroTips
 
     def show
       user = fetch_user_from_params
+      # Older cores leave the public check out of can_see_profile?.
+      if !guardian.public_can_see_profiles? || !guardian.can_see_profile?(user)
+        raise Discourse::NotFound
+      end
+
       published = user.custom_fields[DiscourseMoneroTips::ADDRESS_FIELD]
       raise Discourse::NotFound if published.blank?
 
@@ -30,12 +35,16 @@ module DiscourseMoneroTips
         return render_json_error(I18n.t("monero_tips.invalid_address"), status: 422)
       end
 
-      # Staff may set it on another account, e.g. system, which authors embedded topics.
+      # Admins may set it on another account, e.g. system, which authors embedded topics.
+      # Whoever sets it decides where that member's tips go, so moderators may not.
       user = params[:username].present? ? fetch_user_from_params : current_user
-      guardian.ensure_can_edit!(user)
+      raise Discourse::InvalidAccess if user != current_user && !current_user.admin?
 
+      previous = user.custom_fields[DiscourseMoneroTips::ADDRESS_FIELD]
       user.custom_fields[DiscourseMoneroTips::ADDRESS_FIELD] = address.presence
       user.save_custom_fields
+
+      log_address_change(user, previous, address) if user != current_user && previous.to_s != address
 
       # The wallet was built from the old address, so it is no longer watching
       # the right place.
@@ -85,6 +94,25 @@ module DiscourseMoneroTips
     end
 
     private
+
+    def log_address_change(user, previous, address)
+      StaffActionLogger.new(current_user).log_custom(
+        "monero_address_change",
+        username: user.username,
+        previous_value: previous,
+        new_value: address,
+      )
+
+      return if user.bot?
+
+      shown = address.presence || I18n.t("monero_tips.no_address", locale: user.effective_locale)
+      SystemMessage.create_from_system_user(
+        user,
+        :monero_address_changed,
+        admin: current_user.username,
+        address: shown,
+      )
+    end
 
     def wallet_address(user = current_user)
       DiscourseMoneroTips.get_wallet(user.id)&.dig("address")

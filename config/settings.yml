@@ -14,7 +14,14 @@ monero:
     client: true
   monero_wallet_rpc_url:
     default: ""
-    description: "JSON-RPC endpoint of a monero-wallet-rpc holding only watch-only wallets, e.g. http://monero-wallet-rpc:18083/json_rpc. Must not be reachable from outside your network."
+    description: "JSON-RPC endpoint of a monero-wallet-rpc holding only watch-only wallets, e.g. http://monero-wallet-rpc:18083/json_rpc. Use https:// unless it is on a network only Discourse can reach."
+  monero_wallet_rpc_username:
+    default: ""
+    description: "The user half of the RPC's --rpc-login."
+  monero_wallet_rpc_password:
+    default: ""
+    secret: true
+    description: "The password half of the RPC's --rpc-login."
   monero_tips_restore_height:
     default: 0
     min: 0

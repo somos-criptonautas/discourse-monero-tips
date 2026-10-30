@@ -15,7 +15,7 @@ Maintained by Criptonautas. Not affiliated with or endorsed by Discourse (Civili
 3. A tip icon appears at the bottom-left of each of their posts and on their profile.
 4. Anyone clicking it gets the address, a QR code, and a `monero:` link that opens their own wallet.
 
-Staff can set the address on another account from that user's preferences, e.g. `system`, which authors embedded topics.
+Admins can set the address on another account from that user's preferences, e.g. `system`, which authors embedded topics. Each change lands in the staff action log as `monero_address_change`, and the member gets a message about it. Moderators cannot.
 
 That is the whole flow. There is no payment, callback or webhook, because nothing passes through Discourse.
 
@@ -71,18 +71,18 @@ monero-tips-wallet-rpc:
     --rpc-bind-port 18083
     --rpc-bind-ip 0.0.0.0
     --confirm-external-bind
-    --disable-rpc-login
+    --rpc-login monero-tips:CHANGE-ME
   volumes:
     - monero-tips-wallets:/wallet
 ```
 
-**It must not be reachable from outside your network.** It takes no authentication, and anything that can reach it can read who paid whom. Keep it on the internal network with Discourse and the node, never published to the host.
+**It must not be reachable from outside your network.** The RPC keeps one wallet open for every client, so anything that reaches it without the login could switch wallets while the forum mints a tip address and send tips somewhere else. Keep it on the internal network with Discourse and the node, never published to the host. The login is HTTP digest, which hides the password but not the traffic, view keys included; if the RPC is anywhere but a network only Discourse reaches, serve it over HTTPS with a certificate Discourse trusts and use an `https://` URL.
 
-Then set `monero_wallet_rpc_url` to `http://monero-tips-wallet-rpc:18083/json_rpc`, set `monero_tips_restore_height` near the current block height so new wallets do not rescan the whole chain, and turn on `monero_tips_verified_enabled`.
+Then set `monero_wallet_rpc_url` to `http://monero-tips-wallet-rpc:18083/json_rpc`, `monero_wallet_rpc_username` and `monero_wallet_rpc_password` to the two halves of `--rpc-login`, set `monero_tips_restore_height` near the current block height so new wallets do not rescan the whole chain, and turn on `monero_tips_verified_enabled`.
 
 ### What a member does
 
-They paste their **private view key** in Preferences → Profile, after reading what that means. The plugin builds a watch-only wallet from their address plus that key, and from then on every member who opens their tip modal gets a subaddress minted for that pair. That is what makes a tip attributable: Monero transfers carry no sender, but they do say which subaddress received them.
+They paste their **private view key** in Preferences → Profile, after reading what that means. The plugin builds a watch-only wallet from their address plus that key, and from then on every member who opens their tip modal gets a subaddress minted for that pair. That is what makes a tip attributable: Monero transfers carry no sender, but they do say which subaddress received them. Only payments to those subaddresses are recorded; whatever else reaches the wallet is not. Nobody is given a subaddress in their own wallet.
 
 A member can turn it off at any time; the key is forgotten and scanning stops. Tips already recorded stay, and badges already earned are not revoked.
 
@@ -97,17 +97,21 @@ Two badges ship as seeds, defined as SQL queries over the plugin's own table, so
 | Badge | Granted to |
 |---|---|
 | Monero Tipper | anyone whose confirmed tip reached another member |
-| Tipped in Monero | anyone who received a confirmed tip |
+| Tipped in Monero | anyone who received a confirmed tip from another member |
+
+Grant times are cut to the day, so a badge page does not pair a tipper with their payee by the second.
 
 `monero_tips_points_per_xmr` additionally gives the tipper gamification points per XMR, if `discourse-gamification` is installed. A tip counts as confirmed at `monero_tips_min_confirmations` (10 by default), and anything under `monero_tips_min_amount` is ignored as dust.
 
 ### Workflows
 
-With Discourse Workflows enabled, a **Monero tip confirmed** trigger fires once per tip, when it reaches `monero_tips_min_confirmations`. It carries the tip (`txid`, `amount` in XMR, `confirmations`, `received_at`, `attributed`), the `payee` and the `tipper` — null for a tip to the member's own address. Its **Attributed tips only** option skips those. Plugins can also listen for the `:monero_tip_confirmed` event directly.
+With Discourse Workflows enabled, a **Monero tip confirmed** trigger fires once per tip, when it reaches `monero_tips_min_confirmations`. It carries the tip (`txid`, `amount` in XMR, `confirmations`, `received_at`, `attributed`), the `payee` and the `tipper` — null once that account is gone. Its **Attributed tips only** option skips those. Plugins can also listen for the `:monero_tip_confirmed` event directly.
 
 ### What is still unverifiable
 
-A tip paid to a member's published address rather than to a minted subaddress is recorded without a sender — the forum can see it arrived but not who sent it. Tips to members who never opted in are not seen at all, and the modal says so.
+A tip paid to a member's published address rather than to a minted subaddress is not recorded — the forum cannot tell it from any other payment. Tips to members who never opted in are not seen at all, and the modal says so.
+
+Attribution is only as honest as the payee. The payee's wallet can pay any subaddress in it, so a payee can credit a tip to a member who never paid, and a member could enroll the address and view key of a wallet that is not theirs. Treat the badges, totals and `monero_tips_points_per_xmr` as claims by the payee, not proof.
 
 ## Development
 

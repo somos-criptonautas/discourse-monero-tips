@@ -3,7 +3,9 @@ en:
     monero_tips_enabled: "Let members show a Monero address so others can tip them directly."
     monero_tips_icon: "Icon for the tip button. Defaults to the Monero glyph bundled with the plugin; pick any other from the list."
     monero_tips_verified_enabled: "Let members opt in to verified tips by supplying a view key. Needs a monero-wallet-rpc."
-    monero_wallet_rpc_url: "JSON-RPC endpoint of a monero-wallet-rpc holding only watch-only wallets. Must not be reachable from outside your network."
+    monero_wallet_rpc_url: "JSON-RPC endpoint of a monero-wallet-rpc holding only watch-only wallets. Use https:// unless it is on a network only Discourse can reach."
+    monero_wallet_rpc_username: "The user half of the wallet RPC's --rpc-login."
+    monero_wallet_rpc_password: "The password half of the wallet RPC's --rpc-login."
     monero_tips_restore_height: "Block height new watch-only wallets start scanning from."
     monero_tips_min_confirmations: "Confirmations before a tip counts as verified."
     monero_tips_min_amount: "Payments smaller than this (in XMR) are ignored."
@@ -13,3 +15,13 @@ en:
     invalid_view_key: "A private view key is 64 hexadecimal characters."
     address_first: "Add your Monero address before turning on verified tips."
     verification_unavailable: "Verified tips are not available on this forum."
+    no_address: "none"
+  system_messages:
+    monero_address_changed:
+      subject_template: "Your Monero address was changed"
+      text_body_template: |
+        Admin @%{admin} changed the Monero address on your account, which is where tips to you are sent. It is now:
+
+        `%{address}`
+
+        If you did not expect this, check it in your preferences and reply to this message.
