@@ -44,7 +44,9 @@ module DiscourseMoneroTips
       user.custom_fields[DiscourseMoneroTips::ADDRESS_FIELD] = address.presence
       user.save_custom_fields
 
-      log_address_change(user, previous, address) if user != current_user && previous.to_s != address
+      if user != current_user && previous.to_s != address
+        log_address_change(user, previous, address)
+      end
 
       # The wallet was built from the old address, so it is no longer watching
       # the right place.
