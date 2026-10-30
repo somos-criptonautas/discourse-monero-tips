@@ -11,7 +11,8 @@ RSpec.describe Badge do
   def seed
     # A fixture is meant to run again, which require_relative would not do.
     # rubocop:disable Discourse/Plugins/UseRequireRelative
-    silence_warnings { load File.expand_path("../../db/fixtures/001_monero_tip_badges.rb", __dir__) }
+    fixture = File.expand_path("../../db/fixtures/001_monero_tip_badges.rb", __dir__)
+    silence_warnings { load fixture }
     # rubocop:enable Discourse/Plugins/UseRequireRelative
   end
 
