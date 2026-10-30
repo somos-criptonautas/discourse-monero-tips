@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 module DiscourseMoneroTips
-  # Talks to a monero-wallet-rpc that holds nothing but watch-only wallets: a
-  # view key cannot spend, so the worst a reachable RPC can do is read who paid
-  # whom. It still belongs on a private network — see the README.
+  # Talks to a monero-wallet-rpc that holds nothing but watch-only wallets. A
+  # view key cannot spend, but whoever reaches the RPC can switch the open wallet
+  # under the forum, so it takes a login and belongs on a private network — see
+  # the README.
   class MoneroWalletRpc
     class Error < StandardError
     end
@@ -53,6 +54,10 @@ module DiscourseMoneroTips
       call("create_address", account_index: 0, label: label)
     end
 
+    def primary_address
+      call("get_address", account_index: 0, address_index: [0])["address"]
+    end
+
     def incoming_transfers
       call("get_transfers", in: true, pending: false, out: false, pool: false)["in"] || []
     end
@@ -61,14 +66,7 @@ module DiscourseMoneroTips
 
     def call(method, params = {})
       uri = URI.parse(SiteSetting.monero_wallet_rpc_url)
-      request = Net::HTTP::Post.new(uri)
-      request["Content-Type"] = "application/json"
-      request.body = {
-        jsonrpc: "2.0",
-        id: "0",
-        method: method,
-        params: params,
-      }.to_json
+      body = { jsonrpc: "2.0", id: "0", method: method, params: params }.to_json
 
       response =
         Net::HTTP.start(
@@ -77,7 +75,15 @@ module DiscourseMoneroTips
           use_ssl: uri.scheme == "https",
           open_timeout: TIMEOUT,
           read_timeout: TIMEOUT,
-        ) { |http| http.request(request) }
+        ) do |http|
+          sent = http.request(post(uri, body))
+          if sent.code == "401" && SiteSetting.monero_wallet_rpc_username.present?
+            sent = http.request(post(uri, body, digest_authorization(uri, sent)))
+          end
+          sent
+        end
+
+      raise Error, "the wallet RPC refused the login" if response.code == "401"
 
       parsed = JSON.parse(response.body)
       raise Error, parsed["error"]["message"] if parsed["error"]
@@ -85,6 +91,46 @@ module DiscourseMoneroTips
       parsed["result"] || {}
     rescue JSON::ParserError, Timeout::Error, SystemCallError, SocketError, URI::Error => e
       raise Error, e.message
+    end
+
+    def post(uri, body, authorization = nil)
+      request = Net::HTTP::Post.new(uri)
+      request["Content-Type"] = "application/json"
+      request["Authorization"] = authorization if authorization
+      request.body = body
+      request
+    end
+
+    DIGESTS = { "SHA-256" => Digest::SHA256, "MD5" => Digest::MD5 }
+
+    # monero-wallet-rpc's --rpc-login only speaks HTTP digest (RFC 7616), and it
+    # starts a fresh nonce on every challenge, so each call answers its own.
+    def digest_authorization(uri, challenge)
+      fields =
+        challenge
+          .get_fields("www-authenticate")
+          .to_a
+          .flat_map { |header| header.split(/,\s*(?=Digest )/) }
+          .filter_map do |header|
+            next unless header.start_with?("Digest ")
+            header.scan(/(\w+)="?([^",]*)"?/).to_h
+          end
+      # Strongest first, whatever order the challenges came in.
+      server =
+        DIGESTS.keys.filter_map { |a| fields.find { |f| f.fetch("algorithm", "MD5") == a } }.first
+      raise Error, "the wallet RPC offered no usable login" if server.nil?
+
+      algorithm = server.fetch("algorithm", "MD5")
+      hash = ->(*parts) { DIGESTS[algorithm].hexdigest(parts.join(":")) }
+      username = SiteSetting.monero_wallet_rpc_username
+      cnonce = SecureRandom.hex(16)
+      ha1 = hash.(username, server["realm"], SiteSetting.monero_wallet_rpc_password)
+      ha2 = hash.("POST", uri.request_uri)
+      response = hash.(ha1, server["nonce"], "00000001", cnonce, "auth", ha2)
+
+      %(Digest username="#{username}", realm="#{server["realm"]}", ) +
+        %(nonce="#{server["nonce"]}", uri="#{uri.request_uri}", algorithm=#{algorithm}, ) +
+        %(qop=auth, nc=00000001, cnonce="#{cnonce}", response="#{response}")
     end
   end
 end

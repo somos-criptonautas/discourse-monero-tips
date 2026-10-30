@@ -9,7 +9,11 @@ RSpec.describe DiscourseMoneroTips::MoneroTipsController do
   # A real mainnet address: 95 base58 characters starting with 4.
   let(:address) { "4#{"8" * 94}" }
 
-  before { SiteSetting.monero_tips_enabled = true }
+  before do
+    SiteSetting.monero_tips_enabled = true
+    # Fabricated members have no posts, which core hides from most viewers.
+    SiteSetting.hide_new_user_profiles = false
+  end
 
   describe "#update" do
     it "requires an account" do
@@ -47,13 +51,45 @@ RSpec.describe DiscourseMoneroTips::MoneroTipsController do
       expect(user.reload.custom_fields["monero_address"]).to be_blank
     end
 
-    it "lets staff set the address of the system user" do
+    it "lets an admin set the address of the system user" do
       sign_in(Fabricate(:admin))
 
       put "/monero-tips/address.json", params: { address: address, username: "system" }
 
       expect(response.status).to eq(200)
       expect(Discourse.system_user.reload.custom_fields["monero_address"]).to eq(address)
+    end
+
+    it "logs an admin changing a member's address and tells the member" do
+      admin = Fabricate(:admin)
+      sign_in(admin)
+
+      expect {
+        put "/monero-tips/address.json", params: { address: address, username: payee.username }
+      }.to change { TopicAllowedUser.where(user_id: payee.id).count }.by(1)
+
+      expect(response.status).to eq(200)
+      log = UserHistory.find_by(custom_type: "monero_address_change")
+      expect(log.acting_user_id).to eq(admin.id)
+      expect(log.new_value).to eq(address)
+      expect(log.details).to include(payee.username)
+    end
+
+    it "does not let a moderator change someone else's address" do
+      sign_in(Fabricate(:moderator))
+
+      put "/monero-tips/address.json", params: { address: address, username: payee.username }
+
+      expect(response.status).to eq(403)
+      expect(payee.reload.custom_fields["monero_address"]).to be_blank
+    end
+
+    it "does not log a member changing their own address" do
+      sign_in(user)
+
+      put "/monero-tips/address.json", params: { address: address }
+
+      expect(UserHistory.where(custom_type: "monero_address_change")).to be_empty
     end
 
     it "does not let a member set someone else's address" do
@@ -77,6 +113,28 @@ RSpec.describe DiscourseMoneroTips::MoneroTipsController do
       expect(response.parsed_body["address"]).to eq(address)
       expect(response.parsed_body["uri"]).to eq("monero:#{address}")
       expect(response.parsed_body["qr"]).to start_with("data:image/png;base64,")
+    end
+
+    it "404s for a member whose profile is hidden" do
+      SiteSetting.allow_users_to_hide_profile = true
+      payee.custom_fields["monero_address"] = address
+      payee.save_custom_fields
+      payee.user_option.update!(hide_profile: true)
+      sign_in(user)
+
+      get "/monero-tips/#{payee.username}.json"
+
+      expect(response.status).to eq(404)
+    end
+
+    it "404s for everyone when profiles are hidden from the public" do
+      SiteSetting.hide_user_profiles_from_public = true
+      payee.custom_fields["monero_address"] = address
+      payee.save_custom_fields
+
+      get "/monero-tips/#{payee.username}.json"
+
+      expect(response.status).to eq(404)
     end
 
     it "404s for a member who set none" do
@@ -107,18 +165,23 @@ RSpec.describe "verified Monero tips" do
 
   before do
     SiteSetting.monero_tips_enabled = true
+    SiteSetting.hide_new_user_profiles = false
     SiteSetting.monero_tips_verified_enabled = true
     SiteSetting.monero_wallet_rpc_url = rpc_url
   end
 
-  def rpc_returns(result)
-    stub_request(:post, rpc_url).to_return(
-      status: 200,
-      body: { jsonrpc: "2.0", id: "0", result: result }.to_json,
-      headers: {
-        "Content-Type" => "application/json",
-      },
-    )
+  # Answers by RPC method; anything not listed gets an empty result.
+  def rpc_returns(results)
+    stub_request(:post, rpc_url).to_return do |request|
+      result = results.fetch(JSON.parse(request.body)["method"], {})
+      {
+        status: 200,
+        body: { jsonrpc: "2.0", id: "0", result: result }.to_json,
+        headers: {
+          "Content-Type" => "application/json",
+        },
+      }
+    end
   end
 
   describe "enrolling" do
@@ -199,7 +262,15 @@ RSpec.describe "verified Monero tips" do
         { "address" => address, "view_key" => view_key, "wallet" => "w", "status" => "ready" },
       )
       subaddress = "8#{"5" * 94}"
-      rpc_returns("address" => subaddress, "address_index" => 3)
+      rpc_returns(
+        "create_address" => {
+          "address" => subaddress,
+          "address_index" => 3,
+        },
+        "get_address" => {
+          "address" => address,
+        },
+      )
       sign_in(user)
 
       get "/monero-tips/#{payee.username}.json"
@@ -210,6 +281,42 @@ RSpec.describe "verified Monero tips" do
       expect(
         MoneroTipAddress.find_by(payee_id: payee.id, tipper_id: user.id).address,
       ).to eq(subaddress)
+    end
+
+    it "is not minted when the RPC has another wallet open" do
+      DiscourseMoneroTips.store_wallet(
+        payee.id,
+        { "address" => address, "view_key" => view_key, "wallet" => "w", "status" => "ready" },
+      )
+      rpc_returns(
+        "create_address" => {
+          "address" => "8#{"5" * 94}",
+          "address_index" => 3,
+        },
+        "get_address" => {
+          "address" => "4#{"2" * 94}",
+        },
+      )
+      sign_in(user)
+
+      get "/monero-tips/#{payee.username}.json"
+
+      expect(response.parsed_body["address"]).to eq(address)
+      expect(response.parsed_body["attributed"]).to eq(false)
+      expect(MoneroTipAddress.count).to eq(0)
+    end
+
+    it "is the published address when the payee opens their own modal" do
+      DiscourseMoneroTips.store_wallet(
+        payee.id,
+        { "address" => address, "view_key" => view_key, "wallet" => "w", "status" => "ready" },
+      )
+      sign_in(payee)
+
+      get "/monero-tips/#{payee.username}.json"
+
+      expect(response.parsed_body["attributed"]).to eq(false)
+      expect(MoneroTipAddress.count).to eq(0)
     end
 
     it "is reused rather than minted twice" do

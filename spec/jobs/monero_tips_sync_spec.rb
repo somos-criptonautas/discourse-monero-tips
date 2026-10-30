@@ -105,12 +105,27 @@ RSpec.describe Jobs::MoneroTipsSync do
     expect(repeat_events).to be_empty
   end
 
-  it "records a payment to the wallet's own address with no tipper" do
-    transfers_return([transfer("address" => wallet_address, "txid" => "def456")])
+  it "ignores payments that did not reach a minted subaddress" do
+    transfers_return(
+      [
+        transfer("address" => wallet_address, "txid" => "def456"),
+        transfer("address" => "8#{"6" * 94}", "txid" => "ghi789"),
+      ],
+    )
 
     described_class.new.execute({})
 
-    expect(MoneroTip.last.tipper_id).to be_nil
+    expect(MoneroTip.count).to eq(0)
+  end
+
+  it "ignores a payee paying a subaddress minted for themself" do
+    own = "8#{"3" * 94}"
+    MoneroTipAddress.create!(payee_id: payee.id, tipper_id: payee.id, address: own)
+    transfers_return([transfer("address" => own)])
+
+    described_class.new.execute({})
+
+    expect(MoneroTip.count).to eq(0)
   end
 
   it "ignores dust" do

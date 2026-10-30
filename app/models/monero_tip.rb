@@ -7,6 +7,9 @@ class MoneroTip < ActiveRecord::Base
   belongs_to :tipper, class_name: "User", optional: true
 
   scope :confirmed, -> { where(confirmed: true) }
+  # What totals and badges count: a confirmed payment from another member. Rows
+  # without a tipper predate 0.4.0, when every incoming transfer was recorded.
+  scope :counted, -> { confirmed.where("tipper_id <> payee_id") }
 
   def amount_xmr
     amount.to_d / ATOMIC_UNITS

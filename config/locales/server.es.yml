@@ -3,7 +3,9 @@ es:
     monero_tips_enabled: "Permite que cada miembro muestre una dirección de Monero para recibir propinas directas."
     monero_tips_icon: "Icono del botón de propina. Por defecto es el glifo de Monero incluido en el plugin; podés elegir cualquier otro de la lista."
     monero_tips_verified_enabled: "Permite que los miembros activen propinas verificadas entregando una clave de vista. Necesita un monero-wallet-rpc."
-    monero_wallet_rpc_url: "Endpoint JSON-RPC de un monero-wallet-rpc que solo tenga monederos de solo lectura. No puede quedar accesible desde fuera de tu red."
+    monero_wallet_rpc_url: "Endpoint JSON-RPC de un monero-wallet-rpc que solo tenga monederos de solo lectura. Usá https:// salvo que esté en una red a la que solo llegue Discourse."
+    monero_wallet_rpc_username: "El usuario del --rpc-login del wallet RPC."
+    monero_wallet_rpc_password: "La contraseña del --rpc-login del wallet RPC."
     monero_tips_restore_height: "Altura de bloque desde la que empiezan a escanear los monederos nuevos."
     monero_tips_min_confirmations: "Confirmaciones para que una propina cuente como verificada."
     monero_tips_min_amount: "Los pagos menores a esto (en XMR) se ignoran."
@@ -13,3 +15,13 @@ es:
     invalid_view_key: "Una clave de vista privada son 64 caracteres hexadecimales."
     address_first: "Agregá tu dirección de Monero antes de activar las propinas verificadas."
     verification_unavailable: "Las propinas verificadas no están disponibles en este foro."
+    no_address: "ninguna"
+  system_messages:
+    monero_address_changed:
+      subject_template: "Cambiaron tu dirección de Monero"
+      text_body_template: |
+        El admin @%{admin} cambió la dirección de Monero de tu cuenta, que es adonde llegan las propinas que te mandan. Ahora es:
+
+        `%{address}`
+
+        Si no lo esperabas, revisala en tus preferencias y respondé este mensaje.

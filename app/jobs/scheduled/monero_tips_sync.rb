@@ -36,9 +36,11 @@ module Jobs
         amount = transfer["amount"].to_i
         next if amount < minimum
 
-        # The wallet's own address receives from anywhere, so only payments to a
-        # subaddress minted for one tipper can be attributed to them.
+        # Only a payment to a subaddress minted for one tipper is a tip. Anything
+        # else reaching this wallet is the member's own business, not the forum's.
         mapping = MoneroTipAddress.find_by(payee_id: payee_id, address: transfer["address"])
+        next if mapping.nil? || mapping.tipper_id == payee_id
+
         confirmations = transfer["confirmations"].to_i
 
         tip =
@@ -49,7 +51,7 @@ module Jobs
           )
         was_confirmed = tip.confirmed
 
-        tip.tipper_id = mapping&.tipper_id
+        tip.tipper_id = mapping.tipper_id
         tip.amount = amount
         tip.confirmations = confirmations
         tip.confirmed = confirmations >= required
@@ -67,7 +69,7 @@ module Jobs
     # the badge granter grants them without any help from here.
     def award_points(tip)
       per_xmr = SiteSetting.monero_tips_points_per_xmr
-      return if per_xmr <= 0 || tip.tipper_id.blank?
+      return if per_xmr <= 0
       return unless defined?(::DiscourseGamification::GamificationScoreEvent)
 
       points = (tip.amount_xmr * per_xmr).round

@@ -15,7 +15,7 @@ Mantenido por Criptonautas. Sin afiliación ni respaldo de Discourse (Civilized 
 3. Aparece un icono de propina en la esquina inferior izquierda de cada publicación suya y en su perfil.
 4. Quien lo toque obtiene la dirección, un código QR y un enlace `monero:` que abre su propio monedero.
 
-El staff puede cargar la dirección de otra cuenta desde las preferencias de ese usuario, por ejemplo `system`, que es quien publica los temas incrustados.
+Los admins pueden cargar la dirección de otra cuenta desde las preferencias de ese usuario, por ejemplo `system`, que es quien publica los temas incrustados. Cada cambio queda en el registro de acciones del staff como `monero_address_change`, y el miembro recibe un mensaje avisándole. Los moderadores no pueden.
 
 Ese es todo el flujo. No hay pago, ni callback, ni webhook, porque nada pasa por Discourse.
 
@@ -71,18 +71,18 @@ monero-tips-wallet-rpc:
     --rpc-bind-port 18083
     --rpc-bind-ip 0.0.0.0
     --confirm-external-bind
-    --disable-rpc-login
+    --rpc-login monero-tips:CAMBIAME
   volumes:
     - monero-tips-wallets:/wallet
 ```
 
-**No puede quedar accesible desde fuera de tu red.** No pide autenticación, y cualquier cosa que lo alcance puede leer quién le pagó a quién. Dejalo en la red interna con Discourse y el nodo, nunca publicado al host.
+**No puede quedar accesible desde fuera de tu red.** El RPC tiene un solo monedero abierto para todos sus clientes, así que cualquier cosa que lo alcance sin el login podría cambiar de monedero mientras el foro crea una dirección de propina y mandar las propinas a otro lado. Dejalo en la red interna con Discourse y el nodo, nunca publicado al host. El login es HTTP digest, que oculta la contraseña pero no el tráfico, claves de vista incluidas; si el RPC está en otro lugar que una red a la que solo llega Discourse, servilo por HTTPS con un certificado en el que Discourse confíe y usá una URL `https://`.
 
-Después poné `monero_wallet_rpc_url` en `http://monero-tips-wallet-rpc:18083/json_rpc`, `monero_tips_restore_height` cerca de la altura actual para que los monederos nuevos no reescaneen toda la cadena, y activá `monero_tips_verified_enabled`.
+Después poné `monero_wallet_rpc_url` en `http://monero-tips-wallet-rpc:18083/json_rpc`, `monero_wallet_rpc_username` y `monero_wallet_rpc_password` en las dos mitades de `--rpc-login`, `monero_tips_restore_height` cerca de la altura actual para que los monederos nuevos no reescaneen toda la cadena, y activá `monero_tips_verified_enabled`.
 
 ### Qué hace un miembro
 
-Pega su **clave de vista privada** en Preferencias → Perfil, después de leer qué implica. El plugin arma un monedero de solo lectura con su dirección y esa clave, y desde ahí cada miembro que abra su ventana de propina recibe una subdirección creada para ese par. Eso es lo que permite atribuir la propina: las transferencias de Monero no dicen quién envía, pero sí a qué subdirección llegaron.
+Pega su **clave de vista privada** en Preferencias → Perfil, después de leer qué implica. El plugin arma un monedero de solo lectura con su dirección y esa clave, y desde ahí cada miembro que abra su ventana de propina recibe una subdirección creada para ese par. Eso es lo que permite atribuir la propina: las transferencias de Monero no dicen quién envía, pero sí a qué subdirección llegaron. Solo se registran los pagos a esas subdirecciones; lo demás que llegue al monedero, no. Nadie recibe una subdirección de su propio monedero.
 
 Puede desactivarlo cuando quiera: la clave se olvida y el escaneo se detiene. Las propinas ya registradas quedan, y las insignias ya otorgadas no se quitan.
 
@@ -97,17 +97,21 @@ Vienen dos insignias como semillas, definidas como consultas SQL sobre la tabla 
 | Insignia | Para quién |
 |---|---|
 | Monero Tipper | quien haya hecho llegar una propina confirmada a otro miembro |
-| Tipped in Monero | quien haya recibido una propina confirmada |
+| Tipped in Monero | quien haya recibido una propina confirmada de otro miembro |
+
+Las fechas de otorgamiento se redondean al día, para que la página de una insignia no empareje al segundo a quien envía con quien recibe.
 
 `monero_tips_points_per_xmr` además le da puntos de gamificación a quien envía, por XMR, si está instalado `discourse-gamification`. Una propina cuenta como confirmada a partir de `monero_tips_min_confirmations` (10 por defecto), y todo lo que esté por debajo de `monero_tips_min_amount` se ignora como polvo.
 
 ### Workflows
 
-Con Discourse Workflows activado, el disparador **Propina en Monero confirmada** se ejecuta una vez por propina, cuando llega a `monero_tips_min_confirmations`. Trae la propina (`txid`, `amount` en XMR, `confirmations`, `received_at`, `attributed`), el `payee` y el `tipper`, que es nulo para una propina a la dirección propia del miembro. Su opción **Solo propinas atribuidas** las ignora. Otros plugins también pueden escuchar el evento `:monero_tip_confirmed` directamente.
+Con Discourse Workflows activado, el disparador **Propina en Monero confirmada** se ejecuta una vez por propina, cuando llega a `monero_tips_min_confirmations`. Trae la propina (`txid`, `amount` en XMR, `confirmations`, `received_at`, `attributed`), el `payee` y el `tipper`, que es nulo cuando esa cuenta ya no existe. Su opción **Solo propinas atribuidas** las ignora. Otros plugins también pueden escuchar el evento `:monero_tip_confirmed` directamente.
 
 ### Qué sigue sin poder verificarse
 
-Una propina pagada a la dirección pública de un miembro, y no a una subdirección creada para quien envía, se registra sin remitente: el foro ve que llegó pero no de quién. Las propinas a miembros que nunca lo activaron no se ven en absoluto, y la ventana lo dice.
+Una propina pagada a la dirección pública de un miembro, y no a una subdirección creada para quien envía, no se registra: el foro no puede distinguirla de cualquier otro pago. Las propinas a miembros que nunca lo activaron no se ven en absoluto, y la ventana lo dice.
+
+La atribución es tan honesta como quien recibe. Su monedero puede pagarle a cualquiera de sus subdirecciones, así que puede acreditar una propina a un miembro que nunca pagó, y un miembro podría activar la dirección y la clave de vista de un monedero ajeno. Tomá las insignias, los totales y `monero_tips_points_per_xmr` como lo que dice quien recibe, no como prueba.
 
 ## Desarrollo
 

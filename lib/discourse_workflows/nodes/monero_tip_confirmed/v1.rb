@@ -5,8 +5,8 @@ if defined?(DiscourseWorkflows)
     module Nodes
       module MoneroTipConfirmed
         # Fires once per tip, when the sync job first sees it pass the
-        # confirmation threshold. A tip to a member's own address cannot be
-        # attributed, so the tipper is null for those.
+        # confirmation threshold. Only attributed tips are recorded, so the
+        # tipper is null only once that account is gone.
         class V1 < DiscourseWorkflows::NodeType
           OUTPUT_SCHEMA =
             DiscourseWorkflows::Schema.document(

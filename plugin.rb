@@ -2,7 +2,7 @@
 
 # name: discourse-monero-tips
 # about: Member-to-member Monero tips that go straight to each member's own wallet
-# version: 0.3.0
+# version: 0.4.0
 # authors: Criptonautas
 # url: https://github.com/somos-criptonautas/discourse-monero-tips
 # required_version: 3.4.0
@@ -82,10 +82,11 @@ after_initialize do
 
     # The address a given tipper should pay: their own subaddress of the payee's
     # wallet when the payee enrolled, so the tip can be attributed to them, and
-    # the plain published address otherwise.
+    # the plain published address otherwise. Tipping yourself is not a tip, so
+    # nobody gets a subaddress in their own wallet.
     def self.tip_address_for(payee, tipper)
       published = payee.custom_fields[ADDRESS_FIELD]
-      return published if tipper.blank? || !enrolled?(payee.id)
+      return published if tipper.blank? || tipper.id == payee.id || !enrolled?(payee.id)
 
       existing = ::MoneroTipAddress.find_by(payee_id: payee.id, tipper_id: tipper.id)
       return existing.address if existing
@@ -99,17 +100,25 @@ after_initialize do
 
       rpc = MoneroWalletRpc.new
 
-      result =
+      result, primary =
         MoneroWalletRpc.with_lock do
           rpc.close_wallet
           rpc.open_wallet(wallet["wallet"])
-          rpc.create_address("tip from #{tipper.username}")
+          [rpc.create_address("tip from #{tipper.username}"), rpc.primary_address]
         end
+
+      # The RPC holds one open wallet for every client it has, so make sure the
+      # subaddress came from this payee's wallet before tips are sent to it.
+      address = result["address"].to_s
+      if primary != wallet["address"] || !address.start_with?("8") ||
+           !address.match?(ADDRESS_FORMAT)
+        raise MoneroWalletRpc::Error, "the wallet RPC answered for a different wallet"
+      end
 
       ::MoneroTipAddress.create!(
         payee_id: payee.id,
         tipper_id: tipper.id,
-        address: result["address"],
+        address: address,
         address_index: result["address_index"],
       ).address
     rescue MoneroWalletRpc::Error => e
@@ -134,10 +143,10 @@ after_initialize do
     :monero_tips,
     include_condition: -> {
       SiteSetting.monero_tips_enabled && DiscourseMoneroTips.tips_table_ready? &&
-        MoneroTip.exists?(payee_id: object.id, confirmed: true)
+        MoneroTip.counted.exists?(payee_id: object.id)
     },
   ) do
-    tips = MoneroTip.confirmed.where(payee_id: object.id)
+    tips = MoneroTip.counted.where(payee_id: object.id)
 
     { count: tips.count, total: tips.sum(:amount).to_d / MoneroTip::ATOMIC_UNITS }
   end
