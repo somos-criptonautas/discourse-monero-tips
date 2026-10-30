@@ -110,6 +110,7 @@ module DiscourseMoneroTips
         challenge
           .get_fields("www-authenticate")
           .to_a
+          .flat_map { |header| header.split(/,\s*(?=Digest )/) }
           .filter_map do |header|
             next unless header.start_with?("Digest ")
             header.scan(/(\w+)="?([^",]*)"?/).to_h

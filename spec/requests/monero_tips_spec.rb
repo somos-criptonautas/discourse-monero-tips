@@ -9,7 +9,11 @@ RSpec.describe DiscourseMoneroTips::MoneroTipsController do
   # A real mainnet address: 95 base58 characters starting with 4.
   let(:address) { "4#{"8" * 94}" }
 
-  before { SiteSetting.monero_tips_enabled = true }
+  before do
+    SiteSetting.monero_tips_enabled = true
+    # Fabricated members have no posts, which core hides from most viewers.
+    SiteSetting.hide_new_user_profiles = false
+  end
 
   describe "#update" do
     it "requires an account" do
@@ -161,6 +165,7 @@ RSpec.describe "verified Monero tips" do
 
   before do
     SiteSetting.monero_tips_enabled = true
+    SiteSetting.hide_new_user_profiles = false
     SiteSetting.monero_tips_verified_enabled = true
     SiteSetting.monero_wallet_rpc_url = rpc_url
   end

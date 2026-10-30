@@ -2,14 +2,17 @@
 
 require "rails_helper"
 
-RSpec.describe "Monero tip badges" do
+RSpec.describe Badge do
   fab!(:payee, :user)
   fab!(:tipper, :user)
 
   let(:received_at) { Time.utc(2026, 10, 1, 13, 37, 42) }
 
   def seed
-    load File.expand_path("../../db/fixtures/001_monero_tip_badges.rb", __dir__)
+    # A fixture is meant to run again, which require_relative would not do.
+    # rubocop:disable Discourse/Plugins/UseRequireRelative
+    silence_warnings { load File.expand_path("../../db/fixtures/001_monero_tip_badges.rb", __dir__) }
+    # rubocop:enable Discourse/Plugins/UseRequireRelative
   end
 
   def tip(tipper_id:, txid:)
